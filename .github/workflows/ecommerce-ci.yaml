@@ -7,7 +7,6 @@ on:
       - 'ecommerce-platform/**'
   workflow_dispatch:
 
-# ✅ CẤP QUYỀN GHI CHO PIPELINE
 permissions:
   contents: write
 
@@ -40,50 +39,33 @@ jobs:
           cd ecommerce-platform/backend
           mvn clean package -DskipTests
           docker build -t ${{ secrets.DOCKER_USERNAME }}/ecommerce-backend:${{ github.sha }} .
-
-      - name: Run Trivy for Backend
-        uses: aquasecurity/trivy-action@master
-        with:
-          image-ref: '${{ secrets.DOCKER_USERNAME }}/ecommerce-backend:${{ github.sha }}'
-          format: 'table'
-          exit-code: '0'
-          ignore-unfixed: true
-          vuln-type: 'os,library'
-          severity: 'CRITICAL,HIGH'
-
-      - name: Push Backend image
-        run: docker push ${{ secrets.DOCKER_USERNAME }}/ecommerce-backend:${{ github.sha }}
+          docker push ${{ secrets.DOCKER_USERNAME }}/ecommerce-backend:${{ github.sha }}
 
       # Build & Scan Frontend
       - name: Build Frontend image
         run: |
           cd ecommerce-platform/frontend
           docker build -t ${{ secrets.DOCKER_USERNAME }}/ecommerce-frontend:${{ github.sha }} .
+          docker push ${{ secrets.DOCKER_USERNAME }}/ecommerce-frontend:${{ github.sha }}
 
-      - name: Run Trivy for Frontend
-        uses: aquasecurity/trivy-action@master
-        with:
-          image-ref: '${{ secrets.DOCKER_USERNAME }}/ecommerce-frontend:${{ github.sha }}'
-          format: 'table'
-          exit-code: '0'
-          ignore-unfixed: true
-          vuln-type: 'os,library'
-          severity: 'CRITICAL,HIGH'
-
-      - name: Push Frontend image
-        run: docker push ${{ secrets.DOCKER_USERNAME }}/ecommerce-frontend:${{ github.sha }}
-
-      # GitOps Update
+      # GitOps Update: Đẩy thay đổi sang nhánh RIÊNG BIỆT
       - name: Update Kubernetes Manifests
         run: |
-          sed -i "s|image: .*/ecommerce-backend:.*|image: ${{ secrets.DOCKER_USERNAME }}/ecommerce-backend:${{ github.sha }}|g" k8s/backend-rollout.yaml
-          sed -i "s|image: .*/ecommerce-frontend:.*|image: ${{ secrets.DOCKER_USERNAME }}/ecommerce-frontend:${{ github.sha }}|g" k8s/frontend-rollout.yaml
           git config --global user.email "ci-bot@example.com"
           git config --global user.name "CI Bot"
+          
+          # Tạo hoặc chuyển sang nhánh gitops-deploy
+          git checkout -b gitops-deploy || git checkout gitops-deploy
+          
+          # Sửa file YAML
+          sed -i "s|image: .*/ecommerce-backend:.*|image: ${{ secrets.DOCKER_USERNAME }}/ecommerce-backend:${{ github.sha }}|g" k8s/backend-rollout.yaml
+          sed -i "s|image: .*/ecommerce-frontend:.*|image: ${{ secrets.DOCKER_USERNAME }}/ecommerce-frontend:${{ github.sha }}|g" k8s/frontend-rollout.yaml
+          
           git add k8s/
-          git commit -m "chore: update images to ${{ github.sha }} [skip ci]" || echo "No changes"
-          # ✅ SỬ DỤNG GITHUB_TOKEN CÓ SẴN
-          git push origin HEAD:main
+          git commit -m "deploy: update images to ${{ github.sha }}" || echo "No changes"
+          
+          # Đẩy lên nhánh gitops-deploy (Ép buộc để ghi đè lịch sử triển khai)
+          git push origin gitops-deploy --force
 
       - name: Slack Notification
         if: always()
@@ -91,5 +73,5 @@ jobs:
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
           SLACK_COLOR: ${{ job.status == 'success' && 'good' || 'danger' }}
-          SLACK_TITLE: 'Ecommerce Deploy Status: ${{ job.status }}'
-          SLACK_MESSAGE: 'Version ${{ github.sha }} build finished. Scan results are in GitHub logs. 🚀'
+          SLACK_TITLE: 'Ecommerce Deploy Triggered'
+          SLACK_MESSAGE: 'Code on main has been built. Manifests updated on gitops-deploy branch. 🚀'

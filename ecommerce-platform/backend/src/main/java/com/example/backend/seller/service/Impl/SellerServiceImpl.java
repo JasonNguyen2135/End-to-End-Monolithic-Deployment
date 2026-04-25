@@ -14,7 +14,6 @@ import com.example.backend.seller.exception.SellerRequestException;
 import com.example.backend.seller.repository.SellerProfileRepo;
 import com.example.backend.seller.repository.SellerRequestRepo;
 import com.example.backend.seller.service.SellerService;
-import com.example.backend.util.EmailService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -33,7 +32,6 @@ public class SellerServiceImpl implements SellerService {
     private final UsersRepo usersRepo;
     private final SellerRequestRepo sellerRequestRepo;
     private final SellerProfileRepo sellerProfileRepo;
-    private final EmailService emailService;
 
     private static final DateTimeFormatter ISO = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 
@@ -50,7 +48,7 @@ public class SellerServiceImpl implements SellerService {
                     throw new SellerRequestException("You already have a pending seller request");
                 });
 
-        String documentUrl = "https://via.placeholder.com/150"; // Default URL
+        String documentUrl = "https://via.placeholder.com/150";
 
         SellerRequest request = SellerRequest.builder()
                 .user(user)
@@ -96,12 +94,6 @@ public class SellerServiceImpl implements SellerService {
         request.setReviewedBy(adminEmail);
         sellerRequestRepo.save(request);
 
-        emailService.sendEmail(
-                user.getEmail(),
-                "Seller Request Approved",
-                "Congratulations!"
-        );
-
         return new MessageResponse("Seller request approved successfully");
     }
 
@@ -122,12 +114,6 @@ public class SellerServiceImpl implements SellerService {
         request.setReason(reason);
 
         sellerRequestRepo.save(request);
-
-        emailService.sendEmail(
-                request.getUser().getEmail(),
-                "Seller Request Rejected",
-                "Your seller request was rejected."
-        );
 
         return new MessageResponse("Seller request rejected");
     }

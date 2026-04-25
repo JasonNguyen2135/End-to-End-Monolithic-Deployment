@@ -7,6 +7,10 @@ on:
       - 'ecommerce-platform/**'
   workflow_dispatch:
 
+# ✅ CẤP QUYỀN GHI CHO PIPELINE
+permissions:
+  contents: write
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
@@ -42,7 +46,7 @@ jobs:
         with:
           image-ref: '${{ secrets.DOCKER_USERNAME }}/ecommerce-backend:${{ github.sha }}'
           format: 'table'
-          exit-code: '0' # ✅ SỬA: Không dừng pipeline khi có lỗi
+          exit-code: '0'
           ignore-unfixed: true
           vuln-type: 'os,library'
           severity: 'CRITICAL,HIGH'
@@ -61,7 +65,7 @@ jobs:
         with:
           image-ref: '${{ secrets.DOCKER_USERNAME }}/ecommerce-frontend:${{ github.sha }}'
           format: 'table'
-          exit-code: '0' # ✅ SỬA: Không dừng pipeline khi có lỗi
+          exit-code: '0'
           ignore-unfixed: true
           vuln-type: 'os,library'
           severity: 'CRITICAL,HIGH'
@@ -77,8 +81,9 @@ jobs:
           git config --global user.email "ci-bot@example.com"
           git config --global user.name "CI Bot"
           git add k8s/
-          git commit -m "chore: update images to ${{ github.sha }} [skip ci]" || echo "No changes to commit"
-          git push https://${{ secrets.GH_TOKEN }}@github.com/${{ github.repository }}.git HEAD:main
+          git commit -m "chore: update images to ${{ github.sha }} [skip ci]" || echo "No changes"
+          # ✅ SỬ DỤNG GITHUB_TOKEN CÓ SẴN
+          git push origin HEAD:main
 
       - name: Slack Notification
         if: always()

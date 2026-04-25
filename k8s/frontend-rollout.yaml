@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: ecommerce-frontend
-          image: phanphan1504/ecommerce-frontend:latest
+          image: phanphan1504/ecommerce-frontend:v2
           ports:
             - containerPort: 80
           env:

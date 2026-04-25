@@ -80,7 +80,7 @@ jobs:
       - name: Update Kubernetes Manifests
         run: |
           sed -i "s|image: .*/ecommerce-backend:.*|image: ${{ secrets.DOCKER_USERNAME }}/ecommerce-backend:${{ github.sha }}|g" k8s/backend-rollout.yaml
-          sed -i "s|image: .*/ecommerce-frontend:.*|image: ${{ secrets.DOCKER_USERNAME }}/ecommerce-frontend:${{ github.sha }}|g" k8s/frontend-deployment.yaml
+          sed -i "s|image: .*/ecommerce-frontend:.*|image: ${{ secrets.DOCKER_USERNAME }}/ecommerce-frontend:${{ github.sha }}|g" k8s/frontend-rollout.yaml
           git config --global user.email "ci-bot@example.com"
           git config --global user.name "CI Bot"
           git add k8s/

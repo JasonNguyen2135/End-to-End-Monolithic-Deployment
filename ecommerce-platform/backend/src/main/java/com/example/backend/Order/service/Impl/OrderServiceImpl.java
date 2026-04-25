@@ -1,6 +1,5 @@
 package com.example.backend.Order.service.Impl;
 
-
 import com.example.backend.Cart.dto.CartItemResponse;
 import com.example.backend.Cart.service.CartService;
 import com.example.backend.Order.entity.*;
@@ -25,7 +24,6 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
-
 @Service
 @RequiredArgsConstructor
 public class OrderServiceImpl implements OrderService {
@@ -34,20 +32,12 @@ public class OrderServiceImpl implements OrderService {
     private final CartService cartService;
     private final UsersRepo usersRepo;
 
-
-    /**
-     * Create an order from the user's cart and clear the cart.
-     *
-     * @param userEmail       email of the authenticated user
-     * @param shippingAddress shipping address for the order
-     * @return the created Order
-     */
     @Override
     @Transactional
     public Order createOrderFromCart(String userEmail, String shippingAddress) {
-       Users user = usersRepo.findByEmail(userEmail).orElseThrow(
-               () -> new UserNotFoundException("No User found with this email : " + userEmail)
-       );
+        Users user = usersRepo.findByEmail(userEmail).orElseThrow(
+                () -> new UserNotFoundException("No User found with this email : " + userEmail)
+        );
 
         List<CartItemResponse> cartItems = cartService.getCart(userEmail).getItems();
 
@@ -58,7 +48,7 @@ public class OrderServiceImpl implements OrderService {
         Order order = Order.builder()
                 .user(user)
                 .shippingAddress(shippingAddress)
-                .status(OrderStatus.CREATED)
+                .status(OrderStatus.PAID) // Set trạng thái đã thanh toán luôn cho manual payment
                 .build();
 
         BigDecimal total = BigDecimal.ZERO;
@@ -66,6 +56,13 @@ public class OrderServiceImpl implements OrderService {
         for (CartItemResponse ci : cartItems) {
             Product p = productRepository.findById(ci.getProductId())
                     .orElseThrow(() -> new ProductNotFoundException("Product not found with this id : " + ci.getProductId()));
+
+            // TRỪ KHO NGAY TẠI ĐÂY
+            if (p.getStock() < ci.getQuantity()) {
+                throw new ProductOutOfStockException("Sản phẩm " + p.getName() + " không đủ hàng trong kho.");
+            }
+            p.setStock(p.getStock() - ci.getQuantity());
+            productRepository.save(p);
 
             BigDecimal subtotal = p.getPrice().multiply(BigDecimal.valueOf(ci.getQuantity()));
             total = total.add(subtotal);
@@ -83,27 +80,15 @@ public class OrderServiceImpl implements OrderService {
         order.setTotalAmount(total);
         Order saved = orderRepository.save(order);
 
-        // clear cart after order creation
+        // Xóa giỏ hàng sau khi đặt hàng thành công
         cartService.clearCart(userEmail);
 
         return saved;
     }
 
-
-
-    /**
-     * Create a direct order for a specific product and quantity.
-     *
-     * @param userEmail       email of the authenticated user
-     * @param productId       UUID of the product
-     * @param quantity        quantity to order
-     * @param shippingAddress shipping address for the order
-     * @return the created Order
-     */
     @Override
     @Transactional
     public Order createDirectOrder(String userEmail, UUID productId, int quantity, String shippingAddress) {
-
         Users user = usersRepo.findByEmail(userEmail).orElseThrow(
                 () -> new UserNotFoundException("User not found with this email : " + userEmail)
         );
@@ -115,16 +100,13 @@ public class OrderServiceImpl implements OrderService {
             throw new ProductOutOfStockException("Insufficient stock");
         }
 
-        // TODO:: decrement stock after payment
-
-        // decrement stock after creating order
         product.setStock(product.getStock() - quantity);
         productRepository.save(product);
 
         Order order = Order.builder()
                 .user(user)
                 .shippingAddress(shippingAddress)
-                .status(OrderStatus.CREATED)
+                .status(OrderStatus.PAID)
                 .build();
 
         OrderItem item = OrderItem.builder()
@@ -135,23 +117,11 @@ public class OrderServiceImpl implements OrderService {
                 .build();
 
         order.getItems().add(item);
-
-        order.setTotalAmount(
-                product.getPrice().multiply(BigDecimal.valueOf(quantity))
-        );
+        order.setTotalAmount(product.getPrice().multiply(BigDecimal.valueOf(quantity)));
 
         return orderRepository.save(order);
     }
 
-
-
-    /**
-     * Retrieve a specific order by its ID for a user.
-     *
-     * @param id        order ID
-     * @param userEmail email of the authenticated user
-     * @return the found Order
-     */
     @Override
     public Order getOrderById(Long id, String userEmail) {
         Order order = orderRepository.findById(id)
@@ -162,57 +132,32 @@ public class OrderServiceImpl implements OrderService {
         return order;
     }
 
-
-
-    /**
-     * Retrieve paginated orders for a specific user.
-     *
-     * @param userEmail email of the authenticated user
-     * @param pageable  pagination information
-     * @return paginated orders
-     */
-    @SuppressWarnings("NullableProblems")
     @Override
     public Page<Order> getOrdersForUser(String userEmail, Pageable pageable) {
         Users user = usersRepo.findByEmail(userEmail).orElseThrow(
                 () -> new UserNotFoundException("User not found with this email : " + userEmail)
         );
-
         return orderRepository.findAllByUser(user, pageable);
     }
 
-
-
-
-    /**
-     * Cancel an order if allowed by business rules and restore stock.
-     *
-     * @param orderId   ID of the order to cancel
-     * @param userEmail email of the authenticated user
-     */
     @Override
     @Transactional
     public void cancelOrder(Long orderId, String userEmail) {
-
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new OrderNotFoundException("No order found with this Id : ",orderId));
 
-        // ownership check (security)
         if (!userEmail.equals(order.getUser().getEmail())) {
             throw new OrderNotFoundException("No order found with this Id : ",orderId);
         }
 
-        // business rule check
-        if (order.getStatus() == OrderStatus.PAID
-                || order.getStatus() == OrderStatus.DELIVERED) {
+        if (order.getStatus() == OrderStatus.DELIVERED) {
             throw new OrderCancellationException("Order cannot be cancelled at this stage");
         }
 
         if (order.getStatus() == OrderStatus.CANCELLED) {
-            return; // idempotent (cancel twice = no problem)
+            return;
         }
 
-        // restore stock here
         for (OrderItem item : order.getItems()) {
             Product product = item.getProduct();
             product.setStock(product.getStock() + item.getQuantity());

@@ -1,9 +1,8 @@
 package com.example.backend.Product.dto;
-import lombok.*;
 
+import lombok.*;
 import java.math.BigDecimal;
 import java.util.UUID;
-
 
 @Data
 @AllArgsConstructor
@@ -20,6 +19,6 @@ public class ProductResponse {
     private String categoryName;
     private Integer stock;
     private Boolean active;
-
-
+    private UUID sellerId;
+    private String sellerName;
 }

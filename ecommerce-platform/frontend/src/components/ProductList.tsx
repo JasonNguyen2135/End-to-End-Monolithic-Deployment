@@ -1,96 +1,71 @@
 import React, { useEffect, useState } from 'react';
 import { productService, cartService } from '../services/api';
 import { Product } from '../types';
-import { ShoppingBag, Loader2, ShoppingCart } from 'lucide-react';
+import { Loader2, ShoppingCart, Plus, Minus } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 
 const ProductList: React.FC = () => {
     const { refreshCartCount } = useCart();
     const [products, setProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(true);
-    const [addingId, setAddingId] = useState<string | null>(null);
-    const userId = "user123";
+    const [quantities, setQuantities] = useState<{ [key: string]: number }>({});
 
     useEffect(() => {
         const fetchProducts = async () => {
             try {
                 const response = await productService.getAllProducts();
                 setProducts(response.data);
-            } catch (error) {
-                console.error("Error fetching products:", error);
-            } finally {
-                setLoading(false);
-            }
+            } catch (error) { console.error(error); } finally { setLoading(false); }
         };
-
         fetchProducts();
     }, []);
 
-    const handleAddToCart = async (product: Product) => {
-        setAddingId(product.id || product.name);
+    const updateQuantity = (id: string, delta: number) => {
+        setQuantities(prev => ({ ...prev, [id]: Math.max(1, (prev[id] || 1) + delta) }));
+    };
+
+    const addToCart = async (product: Product) => {
         try {
-            await cartService.addToCart(userId, {
-                productId: product.id || product.name,
-                name: product.name,
-                price: product.price,
-                quantity: 1
-            });
+            const qty = quantities[product.id!] || 1;
+            await cartService.addToCart("user123", { productId: product.id, quantity: qty });
+            alert(`Đã thêm ${qty} ${product.name} vào giỏ hàng!`);
             refreshCartCount();
-            alert("Đã thêm vào giỏ hàng!");
-        } catch (error) {
-            console.error("Cart error:", error);
-            alert("Không thể thêm vào giỏ hàng.");
-        } finally {
-            setAddingId(null);
-        }
+        } catch (error) { alert("Lỗi khi thêm vào giỏ hàng."); }
     };
 
     if (loading) return <div className="loader"><Loader2 className="spin" /> Đang tải sản phẩm...</div>;
 
     return (
-        <div className="shop-section">
-            <h2 className="section-title">Sản Phẩm Mới Nhất</h2>
+        <div className="product-list-container container">
+            <h2 className="section-title">Sản Phẩm Cửa Hàng</h2>
             <div className="product-grid">
-                {products.length === 0 ? (
-                    <p className="no-products">Hiện chưa có sản phẩm nào. Vui lòng quay lại sau!</p>
-                ) : (
-                    products.map((product, index) => (
-                        <div key={product.id || index} className="product-card">
-                            <div className="product-image">
-                                {product.imageUrl ? (
-                                    <img src={product.imageUrl} alt={product.name} className="img-fluid" />
-                                ) : (
-                                    <div className="img-placeholder">
-                                        <ShoppingBag size={48} opacity={0.2} />
-                                    </div>
-                                )}
-                                <span className="tag">New</span>
+                {products.map((p) => (
+                    <div key={p.id} className="product-card">
+                        <div className="product-image">
+                            <img src={p.imageUrl || 'https://via.placeholder.com/260'} alt={p.name} />
+                            {p.stock === 0 && <span className="out-of-stock-badge">Hết hàng</span>}
+                        </div>
+                        <div className="product-info">
+                            <span className="category-tag">{p.categoryName || 'Chung'}</span>
+                            <h3>{p.name}</h3>
+                            <p className="description">{p.description}</p>
+                            <div className="price-row">
+                                <span className="price">${p.price.toFixed(2)}</span>
+                                <span className="stock-info">Kho: {p.stock || 0}</span>
                             </div>
-                            <div className="product-info">
-                                <h3 className="product-name">{product.name}</h3>
-                                <p className="product-desc">{product.description}</p>
-                                <div className="stock-info">
-                                    {product.quantity! > 0 ? (
-                                        <span className="stock-status in-stock">Còn lại: {product.quantity}</span>
-                                    ) : (
-                                        <span className="stock-status out-of-stock">Hết hàng</span>
-                                    )}
+                            <div className="product-actions">
+                                <div className="quantity-control">
+                                    <button onClick={() => updateQuantity(p.id!, -1)}>-</button>
+                                    <span>{quantities[p.id!] || 1}</span>
+                                    <button onClick={() => updateQuantity(p.id!, 1)}>+</button>
                                 </div>
-                                <div className="product-footer">
-                                    <span className="price">${product.price.toFixed(2)}</span>
-                                    <button 
-                                        className="btn-buy" 
-                                        onClick={() => handleAddToCart(product)}
-                                        disabled={addingId === (product.id || product.name) || (product.quantity !== undefined && product.quantity <= 0)}
-                                    >
-                                        {addingId === (product.id || product.name) ? <Loader2 className="spin" size={16} /> : 
-                                         (product.quantity !== undefined && product.quantity <= 0) ? "Hết hàng" : "Thêm giỏ hàng"}
-                                    </button>
-                                </div>
+                                <button className="btn-add-cart" onClick={() => addToCart(p)} disabled={p.stock === 0}>
+                                    <ShoppingCart size={18} /> Thêm
+                                </button>
                             </div>
                         </div>
-                    ))
-                )}
+                    </div>
+                ))}
             </div>
         </div>
     );

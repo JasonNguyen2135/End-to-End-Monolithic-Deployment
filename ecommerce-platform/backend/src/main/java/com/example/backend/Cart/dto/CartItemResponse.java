@@ -1,10 +1,8 @@
 package com.example.backend.Cart.dto;
 
 import lombok.*;
-
-import java.math.*;
+import java.math.BigDecimal;
 import java.util.UUID;
-
 
 @Data
 @AllArgsConstructor
@@ -12,7 +10,8 @@ import java.util.UUID;
 @Builder
 public class CartItemResponse {
     private UUID productId;
-    private String productName;
-    private BigDecimal price;
+    private String name;
+    private BigDecimal price; // Dùng BigDecimal
     private Integer quantity;
+    private String imageUrl;
 }

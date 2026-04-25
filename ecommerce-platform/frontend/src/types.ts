@@ -3,17 +3,18 @@ export interface Product {
     name: string;
     description: string;
     price: number;
-    imageUrl?: string;
-    quantity?: number;
-}
-
-export interface OrderLineItemsDto {
-    id?: number;
-    skuCode: string;
-    price: number;
-    quantity: number;
+    imageUrl: string;
+    stock: number; // Bổ sung trường stock
+    categoryName?: string;
+    categoryId?: number;
 }
 
 export interface OrderRequest {
-    orderLineItemsDtoList: OrderLineItemsDto[];
+    orderLineItemsDtoList: OrderLineItem[];
+}
+
+export interface OrderLineItem {
+    skuCode: string;
+    price: number;
+    quantity: number;
 }

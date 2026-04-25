@@ -1,0 +1,60 @@
+package com.example.backend.Config;
+
+import com.example.backend.entity.Role;
+import com.example.backend.entity.Users;
+import com.example.backend.repository.UsersRepo;
+import com.example.backend.Category.entity.Category;
+import com.example.backend.Category.repository.CategoryRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Component;
+
+import java.time.LocalDateTime;
+
+@Component
+@RequiredArgsConstructor
+public class DataInitializer implements CommandLineRunner {
+
+    private final UsersRepo usersRepo;
+    private final CategoryRepository categoryRepository;
+    private final PasswordEncoder passwordEncoder;
+
+    @Override
+    public void run(String... args) throws Exception {
+        // 1. Tạo Category mặc định nếu chưa có
+        if (categoryRepository.count() == 0) {
+            Category defaultCategory = Category.builder()
+                    .name("General")
+                    .description("Default category")
+                    .build();
+            categoryRepository.save(defaultCategory);
+            System.out.println("✅ Default Category 'General' created.");
+        }
+
+        // 2. Kiểm tra và tạo tài khoản ADMIN
+        if (usersRepo.findAll().stream().noneMatch(u -> u.getRole() == Role.ROLE_ADMIN)) {
+            String adminEmail = "admin@vshop.com";
+            String adminPassword = "admin123@Password";
+
+            Users admin = Users.builder()
+                    .firstName("System")
+                    .lastName("Admin")
+                    .email(adminEmail)
+                    .password(passwordEncoder.encode(adminPassword))
+                    .role(Role.ROLE_ADMIN)
+                    .enabled(true)
+                    .emailVerified(true)
+                    .createdAt(LocalDateTime.now())
+                    .profileImageUrl("https://via.placeholder.com/150")
+                    .build();
+
+            usersRepo.save(admin);
+
+            System.out.println("=================================================");
+            System.out.println("🚀 INITIAL DATA SEEDED SUCCESSFULLY");
+            System.out.println("👤 ADMIN ACCOUNT: admin@vshop.com / admin123@Password");
+            System.out.println("=================================================");
+        }
+    }
+}

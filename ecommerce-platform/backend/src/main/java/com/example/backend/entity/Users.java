@@ -41,16 +41,16 @@ public class Users implements UserDetails {
     @Column(nullable = false)
     private Role role; // USER, ADMIN, SELLER
 
-    private boolean enabled = false;
+    private boolean enabled = true; // Mặc định true
 
     @Column(name = "email_verified", nullable = false)
-    private boolean emailVerified = false;
+    private boolean emailVerified = true; // Mặc định true
 
-    private String verificationCode; // for email verification
+    private String verificationCode;
 
-    private String resetPasswordToken; // for password reset
+    private String resetPasswordToken;
 
-    private LocalDateTime resetTokenExpiry; // expiry of reset token
+    private LocalDateTime resetTokenExpiry;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
@@ -70,7 +70,6 @@ public class Users implements UserDetails {
         return List.of(new SimpleGrantedAuthority(role.name()));
     }
 
-    //profile image url
     @Column(name = "profile_image_url")
     private String profileImageUrl;
 
@@ -96,6 +95,6 @@ public class Users implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return emailVerified; // enabled to your emailVerified flag
+        return true; // LUÔN CHO PHÉP
     }
 }

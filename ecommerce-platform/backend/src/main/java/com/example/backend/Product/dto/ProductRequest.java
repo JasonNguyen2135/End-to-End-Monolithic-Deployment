@@ -1,8 +1,7 @@
 package com.example.backend.Product.dto;
 
 import lombok.*;
-
-
+import java.math.BigDecimal;
 
 @Data
 @AllArgsConstructor
@@ -11,8 +10,8 @@ import lombok.*;
 public class ProductRequest {
     private String name;
     private String description;
-    private Double price;
+    private BigDecimal price; // Đổi sang BigDecimal
     private Long categoryId;
     private Integer stock;
-
+    private String imageUrl;
 }

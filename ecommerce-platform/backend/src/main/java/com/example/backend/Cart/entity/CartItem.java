@@ -3,29 +3,29 @@ package com.example.backend.Cart.entity;
 import com.example.backend.Product.entity.Product;
 import jakarta.persistence.*;
 import lombok.*;
-
-import java.util.*;
+import java.math.BigDecimal;
 
 @Entity
-@Getter
-@Setter
-@Builder
+@Table(name = "cart_items")
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "cart_items")
+@Builder
 public class CartItem {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "cart_id", nullable = false)
+    @JoinColumn(name = "cart_id")
     private Cart cart;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id", nullable = false)
+    @JoinColumn(name = "product_id")
     private Product product;
 
-    @Column(nullable = false)
-    private Integer quantity;  // quantity of the product in the cart
+    private Integer quantity;
+
+    @Column(precision = 10, scale = 2)
+    private BigDecimal price; // Dùng BigDecimal
 }

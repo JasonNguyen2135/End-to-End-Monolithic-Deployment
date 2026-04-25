@@ -20,7 +20,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
             // 2. Lấy danh sách sản phẩm thật từ server
             const productRes = await productService.getAllProducts();
-            const validProductNames = productRes.data.map(p => p.name);
+            const validProductNames = productRes.data.map((p: any) => p.name);
 
             // 3. Lọc ra những món còn tồn tại
             const validItems = cartItems.filter((item: any) => validProductNames.includes(item.name));

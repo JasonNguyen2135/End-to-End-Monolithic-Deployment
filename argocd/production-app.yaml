@@ -6,7 +6,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/your-username/your-repo.git # Sửa link repo của bạn
+    repoURL: https://github.com/davidmoi2135/End-to-End-Monolithic-Deployment.git
     targetRevision: HEAD
     path: k8s
   destination:

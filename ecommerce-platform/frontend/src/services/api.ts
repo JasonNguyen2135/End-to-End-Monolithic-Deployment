@@ -1,23 +1,12 @@
 import axios from 'axios';
-import { Product, OrderRequest } from '../types';
 
-const getApiBaseUrl = () => {
-    const hostname = window.location.hostname;
-    // If we are on localhost, we use the NodePort 30085
-    if (hostname === 'localhost' || hostname === '127.0.0.1') {
-        return 'http://localhost:30085';
-    }
-    // If we are on AWS or other cluster, we use the current hostname with the NodePort
-    return `http://${hostname}:30085`;
-};
-
-const API_BASE_URL = getApiBaseUrl();
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8081/api/v1';
 
 const api = axios.create({
     baseURL: API_BASE_URL,
+    headers: { 'Content-Type': 'application/json' }
 });
 
-// Add a request interceptor to include the JWT token in the header
 api.interceptors.request.use((config) => {
     const token = localStorage.getItem('token');
     if (token) {
@@ -26,27 +15,50 @@ api.interceptors.request.use((config) => {
     return config;
 });
 
-export const productService = {
-    getAllProducts: () => api.get<Product[]>('/api/product'),
-    createProduct: (product: Product) => api.post('/api/product', product),
-    deleteProduct: (id: string) => api.delete(`/api/product/${id}`),
+export const authService = {
+    login: (creds: any) => api.post('/auth/login', creds),
+    register: (data: any) => api.post('/auth/register', data),
+    getProfile: () => api.get('/auth/profile'),
 };
 
-export const orderService = {
-    placeOrder: (order: OrderRequest) => api.post('/api/order', order),
+export const productService = {
+    getAllProducts: () => api.get('/products'),
+    getProductById: (id: string) => api.get(`/products/${id}`),
+    createProduct: (data: any) => api.post('/products', data),
+    updateProduct: (id: string, data: any) => api.put(`/products/${id}`, data),
+    deleteProduct: (id: string) => api.delete(`/products/${id}`),
+};
+
+export const categoryService = {
+    getAll: () => api.get('/categories'),
+    create: (name: string) => api.post('/categories', { name }),
 };
 
 export const cartService = {
-    getCart: (userId: string) => api.get(`/api/cart/${userId}`),
-    addToCart: (userId: string, item: any) => api.post(`/api/cart/${userId}/add`, item),
-    clearCart: (userId: string) => api.delete(`/api/cart/${userId}`),
+    getCart: (userId: string) => api.get(`/cart/${userId}`),
+    addToCart: (userId: string, item: any) => api.post(`/cart/${userId}/add`, item),
+    clearCart: (userId: string) => api.delete(`/cart/${userId}`),
 };
 
+export const orderService = {
+    placeOrder: (data: any) => api.post('/orders', data),
+    getMyOrders: () => api.get('/orders/my-orders'),
+};
+
+export const sellerService = {
+    requestSeller: (data: any) => api.post('/seller/request', data),
+    getPendingRequests: () => api.get('/seller/admin/pending'),
+    approveRequest: (id: number) => api.post(`/seller/admin/approve/${id}`),
+};
+
+// BỔ SUNG PAYMENT SERVICE CÒN THIẾU
 export const paymentService = {
-    createPayment: (paymentRequest: { orderId: string, amount: number, orderInfo: string }) => 
-        api.post('/api/payment/create', paymentRequest),
-    manualConfirm: (orderId: string) => 
-        api.post('/api/payment/manual-confirm', { orderId }),
+    createPayment: (paymentRequest: any) => api.post('/payment/create', paymentRequest),
+    manualConfirm: (orderId: string) => api.post('/payment/manual-confirm', { orderId }),
+};
+
+export const adminService = {
+    getAllUsers: () => api.get('/auth/admin/users'),
 };
 
 export default api;

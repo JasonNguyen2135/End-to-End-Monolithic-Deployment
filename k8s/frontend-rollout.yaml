@@ -1,0 +1,58 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: ecommerce-frontend
+  namespace: ecommerce
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ecommerce-frontend
+  template:
+    metadata:
+      labels:
+        app: ecommerce-frontend
+    spec:
+      containers:
+        - name: ecommerce-frontend
+          image: phanphan1504/ecommerce-frontend:latest
+          ports:
+            - containerPort: 80
+          env:
+            - name: BACKEND_URL
+              value: "http://ecommerce-backend-active.ecommerce.svc.cluster.local:8080"
+  strategy:
+    blueGreen: 
+      activeService: ecommerce-frontend-active
+      previewService: ecommerce-frontend-preview
+      autoPromotionEnabled: true # Tự động chuyển sang bản mới khi Pod đã sẵn sàng
+---
+# Service Chính (Dành cho người dùng)
+apiVersion: v1
+kind: Service
+metadata:
+  name: ecommerce-frontend-active
+  namespace: ecommerce
+spec:
+  type: NodePort
+  ports:
+    - port: 80
+      targetPort: 80
+      nodePort: 30080
+  selector:
+    app: ecommerce-frontend
+---
+# Service Xem trước (Dành cho Dev test bản mới)
+apiVersion: v1
+kind: Service
+metadata:
+  name: ecommerce-frontend-preview
+  namespace: ecommerce
+spec:
+  type: NodePort
+  ports:
+    - port: 80
+      targetPort: 80
+      nodePort: 30081 # Cổng để bạn vào xem thử bản mới trước khi nó lên chính thức
+  selector:
+    app: ecommerce-frontend

@@ -19,8 +19,11 @@ spec:
           ports:
             - containerPort: 8080
           env:
+            # ✅ CHO PHÉP FRONTEND PORT BẤT KỲ (VÍ DỤ 30090)
+            - name: ALLOWED_ORIGINS
+              value: "http://localhost:3000,http://localhost:30080,http://localhost:30090,http://vshop.local"
             - name: DB_HOST
-              value: "postgres" # Tên service của Postgres trong K8s
+              value: "postgres"
             - name: DB_NAME
               value: "E_Commerence_DB"
             - name: DB_USERNAME
@@ -29,36 +32,8 @@ spec:
               value: "postgres"
             - name: JWT_SECRET
               value: "VDB6clpTMU1YMDFPTTBaUFVVUkpSVUZVUWtkVFJWSlVWRUZVUlZKVVZFMA=="
-            - name: APP_BASE_URL
-              value: "http://localhost:8081"
   strategy:
     blueGreen: 
       activeService: ecommerce-backend-active
       previewService: ecommerce-backend-preview
       autoPromotionEnabled: true
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: ecommerce-backend-active
-  namespace: ecommerce
-spec:
-  type: NodePort
-  ports:
-    - port: 8080
-      targetPort: 8080
-      nodePort: 30085
-  selector:
-    app: ecommerce-backend
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: ecommerce-backend-preview
-  namespace: ecommerce
-spec:
-  ports:
-    - port: 8080
-      targetPort: 8080
-  selector:
-    app: ecommerce-backend

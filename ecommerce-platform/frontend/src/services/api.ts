@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8081/api/v1';
+// Dùng đường dẫn tương đối, Nginx sẽ lo việc proxy tới Service Backend
+const API_BASE_URL = '/api/v1';
 
 const api = axios.create({
     baseURL: API_BASE_URL,
@@ -51,7 +52,6 @@ export const sellerService = {
     approveRequest: (id: number) => api.post(`/seller/admin/approve/${id}`),
 };
 
-// BỔ SUNG PAYMENT SERVICE CÒN THIẾU
 export const paymentService = {
     createPayment: (paymentRequest: any) => api.post('/payment/create', paymentRequest),
     manualConfirm: (orderId: string) => api.post('/payment/manual-confirm', { orderId }),

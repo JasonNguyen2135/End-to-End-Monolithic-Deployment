@@ -77,8 +77,8 @@ jobs:
           git config --global user.email "ci-bot@example.com"
           git config --global user.name "CI Bot"
           git add k8s/
-          git commit -m "chore: update images to ${{ github.sha }} [skip ci]"
-          git push
+          git commit -m "chore: update images to ${{ github.sha }} [skip ci]" || echo "No changes to commit"
+          git push https://${{ secrets.GH_TOKEN }}@github.com/${{ github.repository }}.git HEAD:main
 
       - name: Slack Notification
         if: always()

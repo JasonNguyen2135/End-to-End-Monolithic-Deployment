@@ -3,17 +3,34 @@ name: Ecommerce Monolith CI/CD
 on:
   push:
     branches: [ "main" ]
-    paths:
-      - 'ecommerce-platform/**'
   workflow_dispatch:
 
 permissions:
   contents: write
 
 jobs:
-  build-and-deploy:
+  # Bước kiểm tra thay đổi
+  check-changes:
     runs-on: ubuntu-latest
+    outputs:
+      backend: ${{ steps.filter.outputs.backend }}
+      frontend: ${{ steps.filter.outputs.frontend }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: |
+            backend:
+              - 'ecommerce-platform/backend/**'
+            frontend:
+              - 'ecommerce-platform/frontend/**'
 
+  # Job build cho Backend
+  build-backend:
+    needs: check-changes
+    if: needs.check-changes.outputs.backend == 'true'
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -33,45 +50,90 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      # Build & Scan Backend
       - name: Build Backend image
         run: |
           cd ecommerce-platform/backend
           mvn clean package -DskipTests
           docker build -t ${{ secrets.DOCKER_USERNAME }}/ecommerce-backend:${{ github.sha }} .
-          docker push ${{ secrets.DOCKER_USERNAME }}/ecommerce-backend:${{ github.sha }}
 
-      # Build & Scan Frontend
+      - name: Run Trivy for Backend
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: '${{ secrets.DOCKER_USERNAME }}/ecommerce-backend:${{ github.sha }}'
+          format: 'table'
+          exit-code: '0'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Push Backend image
+        run: docker push ${{ secrets.DOCKER_USERNAME }}/ecommerce-backend:${{ github.sha }}
+
+      - name: Update Backend Manifest
+        run: |
+          git config --global user.email "ci-bot@example.com"
+          git config --global user.name "CI Bot"
+          git checkout -b gitops-deploy || git checkout gitops-deploy
+          sed -i "s|image: .*/ecommerce-backend:.*|image: ${{ secrets.DOCKER_USERNAME }}/ecommerce-backend:${{ github.sha }}|g" k8s/backend-rollout.yaml
+          git add k8s/backend-rollout.yaml
+          git commit -m "deploy: update backend image to ${{ github.sha }}" || echo "No changes"
+          git push origin gitops-deploy --force
+
+  # Job build cho Frontend
+  build-frontend:
+    needs: check-changes
+    if: needs.check-changes.outputs.frontend == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Login Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
       - name: Build Frontend image
         run: |
           cd ecommerce-platform/frontend
           docker build -t ${{ secrets.DOCKER_USERNAME }}/ecommerce-frontend:${{ github.sha }} .
-          docker push ${{ secrets.DOCKER_USERNAME }}/ecommerce-frontend:${{ github.sha }}
 
-      # GitOps Update: Đẩy thay đổi sang nhánh RIÊNG BIỆT
-      - name: Update Kubernetes Manifests
+      - name: Run Trivy for Frontend
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: '${{ secrets.DOCKER_USERNAME }}/ecommerce-frontend:${{ github.sha }}'
+          format: 'table'
+          exit-code: '0'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Push Frontend image
+        run: docker push ${{ secrets.DOCKER_USERNAME }}/ecommerce-frontend:${{ github.sha }}
+
+      - name: Update Frontend Manifest
         run: |
           git config --global user.email "ci-bot@example.com"
           git config --global user.name "CI Bot"
-          
-          # Tạo hoặc chuyển sang nhánh gitops-deploy
           git checkout -b gitops-deploy || git checkout gitops-deploy
-          
-          # Sửa file YAML
-          sed -i "s|image: .*/ecommerce-backend:.*|image: ${{ secrets.DOCKER_USERNAME }}/ecommerce-backend:${{ github.sha }}|g" k8s/backend-rollout.yaml
           sed -i "s|image: .*/ecommerce-frontend:.*|image: ${{ secrets.DOCKER_USERNAME }}/ecommerce-frontend:${{ github.sha }}|g" k8s/frontend-rollout.yaml
-          
-          git add k8s/
-          git commit -m "deploy: update images to ${{ github.sha }}" || echo "No changes"
-          
-          # Đẩy lên nhánh gitops-deploy (Ép buộc để ghi đè lịch sử triển khai)
+          git add k8s/frontend-rollout.yaml
+          git commit -m "deploy: update frontend image to ${{ github.sha }}" || echo "No changes"
           git push origin gitops-deploy --force
 
+  # Thông báo Slack chung
+  notify:
+    needs: [build-backend, build-frontend]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
       - name: Slack Notification
-        if: always()
         uses: rtCamp/action-slack-notify@v2
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
-          SLACK_COLOR: ${{ job.status == 'success' && 'good' || 'danger' }}
-          SLACK_TITLE: 'Ecommerce Deploy Triggered'
-          SLACK_MESSAGE: 'Code on main has been built. Manifests updated on gitops-deploy branch. 🚀'
+          SLACK_COLOR: 'good'
+          SLACK_TITLE: 'Ecommerce Deployment Info'
+          SLACK_MESSAGE: 'Changes detected and processed. Check ArgoCD for rollout status! 🚀'

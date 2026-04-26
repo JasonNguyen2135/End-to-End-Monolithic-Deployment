@@ -15,21 +15,19 @@ spec:
     spec:
       containers:
         - name: ecommerce-backend
-          image: phanphan1504/ecommerce-backend:80d718441a1c243757516446e53a8b606b403c19
+          image: phanphan1504/ecommerce-backend:latest
           ports:
             - containerPort: 8080
           env:
-            # ✅ CHO PHÉP FRONTEND PORT BẤT KỲ (VÍ DỤ 30090)
+            # ✅ FIX DỨT ĐIỂM: Truyền thẳng URL đầy đủ, không ghép biến trong code
+            - name: SPRING_DATASOURCE_URL
+              value: "jdbc:postgresql://postgres:5432/E_Commerence_DB"
+            - name: SPRING_DATASOURCE_USERNAME
+              value: "postgres"
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: "postgres"
             - name: ALLOWED_ORIGINS
-              value: "http://localhost:3000,http://localhost:30080,http://localhost:30090,http://vshop.local"
-            - name: DB_HOST
-              value: "postgres"
-            - name: DB_NAME
-              value: "E_Commerence_DB"
-            - name: DB_USERNAME
-              value: "postgres"
-            - name: DB_PASSWORD
-              value: "postgres"
+              value: "http://localhost:3000,http://localhost:30080,http://vshop.local"
             - name: JWT_SECRET
               value: "VDB6clpTMU1YMDFPTTBaUFVVUkpSVUZVUWtkVFJWSlVWRUZVUlZKVVZFMA=="
   strategy:

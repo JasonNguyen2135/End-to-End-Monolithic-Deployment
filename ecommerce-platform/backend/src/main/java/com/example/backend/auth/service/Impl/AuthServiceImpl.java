@@ -37,7 +37,7 @@ public class AuthServiceImpl implements AuthService {
     @Transactional
     public RegisterResponse register(SignUpRequest signUpRequest , MultipartFile file) throws IOException {
         if (usersRepo.findByEmail(signUpRequest.getEmail()).isPresent()) {
-            throw new EmailAlreadyUsedException("The new email is already in use.");
+            throw new RuntimeException("The new email is already in use.");
         }
         Role userRole = signUpRequest.getRole() != null ? signUpRequest.getRole() : Role.ROLE_USER;
         
@@ -179,16 +179,6 @@ public class AuthServiceImpl implements AuthService {
         verificationTokenRepo.deleteByUser(user);
         usersRepo.delete(user);
         return new MessageResponse("User Deleted Successfully");
-    }
-
-    @Transactional
-    public UpdateEmailRequest requestEmailUpdate(String currentEmail, String newEmail) {
-        return new UpdateEmailRequest("Email update requested (Email disabled)", newEmail, "DISABLED");
-    }
-
-    @Transactional
-    public UpdateEmailResponse verifyEmailUpdate(String tokenStr) {
-        return new UpdateEmailResponse("Email update verified", "");
     }
 
     public @Nullable List<Users> getAllUsers() {

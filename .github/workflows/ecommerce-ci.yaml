@@ -27,10 +27,8 @@ jobs:
 
   build-backend:
     needs: check-changes
-    # SỬA: Chạy nếu có thay đổi backend HOẶC nếu bấm nút chạy bằng tay
-    if: |
-      always() && 
-      (needs.check-changes.outputs.backend == 'true' || github.event_name == 'workflow_dispatch')
+    # Chỉ chạy nếu có thay đổi ở backend HOẶC chạy bằng tay
+    if: ${{ github.event_name == 'workflow_dispatch' || needs.check-changes.outputs.backend == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -82,10 +80,8 @@ jobs:
 
   build-frontend:
     needs: check-changes
-    # SỬA: Chạy nếu có thay đổi frontend HOẶC nếu bấm nút chạy bằng tay
-    if: |
-      always() && 
-      (needs.check-changes.outputs.frontend == 'true' || github.event_name == 'workflow_dispatch')
+    # Chỉ chạy nếu có thay đổi ở frontend HOẶC chạy bằng tay
+    if: ${{ github.event_name == 'workflow_dispatch' || needs.check-changes.outputs.frontend == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -137,5 +133,5 @@ jobs:
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
           SLACK_COLOR: 'good'
-          SLACK_TITLE: 'Ecommerce Deployment Info'
-          SLACK_MESSAGE: 'Pipeline processed successfully! 🚀'
+          SLACK_TITLE: 'Ecommerce Monolith CI/CD'
+          SLACK_MESSAGE: 'Pipeline execution finished. If build jobs were skipped, no changes were detected in those services. 🚀'

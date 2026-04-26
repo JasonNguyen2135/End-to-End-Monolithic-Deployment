@@ -9,7 +9,6 @@ permissions:
   contents: write
 
 jobs:
-  # Bước kiểm tra thay đổi
   check-changes:
     runs-on: ubuntu-latest
     outputs:
@@ -26,10 +25,12 @@ jobs:
             frontend:
               - 'ecommerce-platform/frontend/**'
 
-  # Job build cho Backend
   build-backend:
     needs: check-changes
-    if: needs.check-changes.outputs.backend == 'true'
+    # SỬA: Chạy nếu có thay đổi backend HOẶC nếu bấm nút chạy bằng tay
+    if: |
+      always() && 
+      (needs.check-changes.outputs.backend == 'true' || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -79,10 +80,12 @@ jobs:
           git commit -m "deploy: update backend image to ${{ github.sha }}" || echo "No changes"
           git push origin gitops-deploy --force
 
-  # Job build cho Frontend
   build-frontend:
     needs: check-changes
-    if: needs.check-changes.outputs.frontend == 'true'
+    # SỬA: Chạy nếu có thay đổi frontend HOẶC nếu bấm nút chạy bằng tay
+    if: |
+      always() && 
+      (needs.check-changes.outputs.frontend == 'true' || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -124,7 +127,6 @@ jobs:
           git commit -m "deploy: update frontend image to ${{ github.sha }}" || echo "No changes"
           git push origin gitops-deploy --force
 
-  # Thông báo Slack chung
   notify:
     needs: [build-backend, build-frontend]
     if: always()
@@ -136,4 +138,4 @@ jobs:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
           SLACK_COLOR: 'good'
           SLACK_TITLE: 'Ecommerce Deployment Info'
-          SLACK_MESSAGE: 'Changes detected and processed. Check ArgoCD for rollout status! 🚀'
+          SLACK_MESSAGE: 'Pipeline processed successfully! 🚀'

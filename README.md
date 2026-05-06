@@ -1,76 +1,76 @@
 # ECOMMERCE MONOLITHIC DEPLOYMENT PIPELINE
 
-He thong thuong mai dien tu Full-stack duoc thiet ke de minh hoa quy trinh trien khai DevSecOps hien dai tren nen tang Kubernetes.
+Hệ thống thương mại điện tử Full-stack được thiết kế để minh họa quy trình triển khai DevSecOps hiện đại trên nền tảng Kubernetes.
 
 ---
 
-## KIEN TRUC HE THONG
+## KIẾN TRÚC HỆ THỐNG
 
-[Chen anh so do kien truc pipeline va ha tang tai day]
+[Chèn ảnh sơ đồ kiến trúc pipeline và hạ tầng tại đây]
 
-Du an tap trung vao viec tu dong hoa chu ky song phat trien phan mem, bao gom cac thanh phan:
-- Giao dien nguoi dung: React (TypeScript)
-- Logic nghiep vu: Spring Boot (Java 21)
-- Luu tru du lieu: PostgreSQL
-- Ha tang trien khai: Kubernetes Cluster
+Dự án tập trung vào việc tự động hóa chu kỳ sống phát triển phần mềm, bao gồm các thành phần:
+- Giao diện người dùng: React (TypeScript)
+- Logic nghiệp vụ: Spring Boot (Java 21)
+- Lưu trữ dữ liệu: PostgreSQL
+- Hạ tầng triển khai: Kubernetes Cluster
 
 ---
 
-## CONG NGHE SU DUNG
+## CÔNG NGHỆ SỬ DỤNG
 
 BACKEND
-- Java 21 va Spring Boot 4.x
-- Spring Security voi co che xac thuc JWT
-- Spring Data JPA ket noi PostgreSQL
+- Java 21 và Spring Boot 4.x
+- Spring Security với cơ chế xác thực JWT
+- Spring Data JPA kết nối PostgreSQL
 
 FRONTEND
-- React 18 va TypeScript
-- Axios giao tiep API
+- React 18 và TypeScript
+- Axios giao tiếp API
 
-DEVOPS VA HA TANG
+DEVOPS VÀ HẠ TẦNG
 - CI/CD Pipeline: GitHub Actions
-- Quan ly container: Docker
-- Dieu phoi container: Kubernetes
+- Quản lý container: Docker
+- Điều phối container: Kubernetes
 - GitOps: ArgoCD
 - Deployment Strategy: Argo Rollouts (Blue-Green Deployment)
-- Security: Quet lo hong image voi Trivy
+- Security: Quét lỗ hổng image với Trivy
 
 ---
 
-## QUY TRINH TRIEN KHAI (CI/CD)
+## QUY TRÌNH TRIỂN KHAI (CI/CD)
 
 1. CODE INTEGRATION
-- Tu dong kiem tra va build ma nguon khi co thay doi tren nhanh main.
-- Thuc hien quet bao mat ma nguon va Docker image bang Trivy de phat hien lo hong.
+- Tự động kiểm tra và build mã nguồn khi có thay đổi trên nhánh main.
+- Thực hiện quét bảo mật mã nguồn và Docker image bằng Trivy để phát hiện lỗ hổng.
 
 2. ARTIFACT MANAGEMENT
-- Dong goi ung dung thanh Docker images.
-- Tu dong gan tag va day (push) image len Docker Hub.
+- Đóng gói ứng dụng thành Docker images.
+- Tự động gán tag và đẩy (push) image lên Docker Hub.
 
 3. GITOPS WORKFLOW
-- Pipeline tu dong cap nhat Manifest YAML (Image Tag) trong repository cau hinh.
-- ArgoCD theo doi repository va tu dong dong bo (sync) trang thai mong muon len Kubernetes cluster.
+- Pipeline tự động cập nhật Manifest YAML (Image Tag) trong repository cấu hình.
+- ArgoCD theo dõi repository và tự động đồng bộ (sync) trạng thái mong muốn lên Kubernetes cluster.
 
 4. BLUE-GREEN DEPLOYMENT
-- Su dung Argo Rollouts de thuc hien trien khai Blue-Green.
-- Tao moi truong Preview de kiem tra phien ban moi truoc khi chuyen traffic.
-- Chuyen doi traffic giua Active Service va Preview Service de dam bao Zero Downtime va co kha nang Rollback tuc thi.
+- Sử dụng Argo Rollouts để thực hiện triển khai Blue-Green.
+- Tạo môi trường Preview để kiểm tra phiên bản mới trước khi chuyển traffic.
+- Chuyển đổi traffic giữa Active Service và Preview Service để đảm bảo Zero Downtime và có khả năng Rollback tức thì.
 
 ---
 
-## HUONG DAN CAI DAT LOCAL
+## HƯỚNG DẪN CÀI ĐẶT LOCAL
 
-YEU CAU
+YÊU CẦU
 - Docker
 - Docker Compose
 
-KHOI CHAY HE THONG
+KHỞI CHẠY HỆ THỐNG
 1. Clone repository:
    git clone https://github.com/davidmoi2135/End-to-End-Monolithic-Deployment.git
 
-2. Khoi chay bang Docker Compose:
+2. Khởi chạy bằng Docker Compose:
    docker-compose up --build
 
-3. Truy cap ung dung:
+3. Truy cập ứng dụng:
    - Frontend: http://localhost:3000
    - Backend API: http://localhost:8081

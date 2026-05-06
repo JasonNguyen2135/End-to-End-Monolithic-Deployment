@@ -1,26 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { sellerService, categoryService, adminService } from '../services/api';
-import { ShieldCheck, Tags, Users, CheckCircle, XCircle, Trash2, Plus, LayoutDashboard } from 'lucide-react';
+import { categoryService, adminService } from '../services/api';
+import { Tags, Users, Trash2, LayoutDashboard } from 'lucide-react';
 
 const AdminDashboard: React.FC = () => {
-    const [tab, setTab] = useState('sellers');
-    const [sellerRequests, setSellers] = useState<any[]>([]);
+    const [tab, setTab] = useState('categories');
     const [categories, setCategories] = useState<any[]>([]);
     const [users, setUsers] = useState<any[]>([]);
     const [newCat, setNewCat] = useState('');
 
     useEffect(() => {
-        if (tab === 'sellers') fetchSellers();
         if (tab === 'categories') fetchCategories();
         if (tab === 'users') fetchUsers();
     }, [tab]);
-
-    const fetchSellers = async () => {
-        try {
-            const res = await sellerService.getPendingRequests();
-            setSellers(res.data);
-        } catch (e) { console.error(e); }
-    };
 
     const fetchCategories = async () => {
         try {
@@ -36,12 +27,6 @@ const AdminDashboard: React.FC = () => {
         } catch (e) { console.error(e); }
     };
 
-    const handleApprove = async (id: number) => {
-        await sellerService.approveRequest(id);
-        alert("Đã duyệt người bán!");
-        fetchSellers();
-    };
-
     return (
         <div className="admin-page container">
             <div className="admin-card">
@@ -54,9 +39,6 @@ const AdminDashboard: React.FC = () => {
 
                 <div className="admin-dashboard">
                     <aside className="admin-sidebar">
-                        <button onClick={() => setTab('sellers')} className={tab === 'sellers' ? 'active' : ''}>
-                            <ShieldCheck size={20} /> Duyệt Người Bán
-                        </button>
                         <button onClick={() => setTab('categories')} className={tab === 'categories' ? 'active' : ''}>
                             <Tags size={20} /> Danh Mục
                         </button>
@@ -67,26 +49,12 @@ const AdminDashboard: React.FC = () => {
 
                     <main className="admin-main-content">
                         <div className="data-section">
-                            {tab === 'sellers' && (
-                                <>
-                                    <h3 className="section-title-sm">Yêu cầu đăng ký Seller</h3>
-                                    {sellerRequests.map(r => (
-                                        <div key={r.id} className="card-item">
-                                            <span>{r.userEmail} - <strong>{r.storeName}</strong></span>
-                                            <div className="actions">
-                                                <button onClick={() => handleApprove(r.id)} className="btn-success-icon"><CheckCircle size={22} color="var(--success)" /></button>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </>
-                            )}
-
                             {tab === 'categories' && (
                                 <>
                                     <h3 className="section-title-sm">Quản lý danh mục</h3>
                                     <div className="add-action-bar">
                                         <input value={newCat} onChange={(e) => setNewCat(e.target.value)} placeholder="Tên danh mục..." className="modern-input" />
-                                        <button onClick={async () => { await categoryService.create(newCat); setNewCat(''); fetchCategories(); }} className="btn-primary-sm">Thêm</button>
+                                        <button onClick={async () => { if(newCat) { await categoryService.create(newCat); setNewCat(''); fetchCategories(); } }} className="btn-primary-sm">Thêm</button>
                                     </div>
                                     {categories.map(c => (
                                         <div key={c.id} className="table-row">

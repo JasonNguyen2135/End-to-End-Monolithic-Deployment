@@ -22,7 +22,7 @@ const Navbar: React.FC = () => {
             <div className="navbar-brand">
                 <Link to="/">
                     <ShoppingBag className="logo-icon" size={28} color="var(--primary)" />
-                    <span className="logo-text">V-Shop Premium</span>
+                    <span className="logo-text">V-Shop Simple</span>
                 </Link>
             </div>
             
@@ -30,7 +30,7 @@ const Navbar: React.FC = () => {
                 <Search size={18} className="search-icon" />
                 <input 
                     type="text" 
-                    placeholder="Tìm kiếm sản phẩm, thương hiệu..." 
+                    placeholder="Tìm kiếm sản phẩm..." 
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                 />
@@ -51,19 +51,18 @@ const Navbar: React.FC = () => {
                         </li>
 
                         {user.role === 'ROLE_ADMIN' && (
-                            <li>
-                                <Link to="/dashboard" title="Admin Dashboard">
-                                    <LayoutDashboard size={20} />
-                                </Link>
-                            </li>
-                        )}
-
-                        {(user.role === 'ROLE_SELLER' || user.role === 'ROLE_ADMIN') && (
-                            <li>
-                                <Link to="/admin" title="Quản lý sản phẩm">
-                                    <Settings size={20} />
-                                </Link>
-                            </li>
+                            <>
+                                <li>
+                                    <Link to="/dashboard" title="Admin Dashboard">
+                                        <LayoutDashboard size={20} />
+                                    </Link>
+                                </li>
+                                <li>
+                                    <Link to="/admin" title="Thêm Sản phẩm">
+                                        <Settings size={20} />
+                                    </Link>
+                                </li>
+                            </>
                         )}
 
                         <li>
@@ -84,7 +83,7 @@ const Navbar: React.FC = () => {
                 ) : (
                     <>
                         <li><Link to="/login" style={{color: 'var(--text)'}}>Đăng nhập</Link></li>
-                        <li><Link to="/register" style={{background: 'var(--primary)', color: 'white', padding: '10px 20px', borderRadius: '12px'}}>Tham gia</Link></li>
+                        <li><Link to="/register" style={{background: 'var(--primary)', color: 'white', padding: '10px 20px', borderRadius: '12px'}}>Đăng ký</Link></li>
                     </>
                 )}
             </ul>

@@ -36,7 +36,7 @@ const Register: React.FC = () => {
                 <div className="auth-header">
                     <UserPlus size={42} style={{color: 'var(--primary)', marginBottom: '15px'}} />
                     <h2>Tham gia cùng V-Shop</h2>
-                    <p>Bắt đầu mua sắm hoặc bán hàng chuyên nghiệp</p>
+                    <p>Bắt đầu trải nghiệm mua sắm ngay hôm nay</p>
                 </div>
 
                 {error && (
@@ -64,13 +64,6 @@ const Register: React.FC = () => {
                     <div className="form-group">
                         <label>Mật khẩu</label>
                         <input type="password" required value={formData.password} onChange={(e) => setFormData({...formData, password: e.target.value})} placeholder="Tối thiểu 8 ký tự" />
-                    </div>
-                    <div className="form-group">
-                        <label>Bạn tham gia với vai trò?</label>
-                        <select className="auth-select" value={formData.role} onChange={(e) => setFormData({...formData, role: e.target.value})}>
-                            <option value="ROLE_USER">Người mua hàng (User)</option>
-                            <option value="ROLE_SELLER">Người bán hàng (Seller)</option>
-                        </select>
                     </div>
                     <button type="submit" className="btn-auth" disabled={loading}>
                         {loading ? <Loader2 className="spin" size={20} /> : "Tạo tài khoản ngay"}

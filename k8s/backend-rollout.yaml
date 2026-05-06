@@ -30,8 +30,6 @@ spec:
               value: "http://localhost:3000,http://localhost:30080,http://vshop.local"
             - name: JWT_SECRET
               value: "VDB6clpTMU1YMDFPTTBaUFVVUkpSVUZVUWtkVFJWSlVWRUZVUlZKVVZFMA=="
-            - name: STRIPE_SECRET_KEY
-              value: "dummy_key_for_testing"
   strategy:
     blueGreen: 
       activeService: ecommerce-backend-active

@@ -46,17 +46,6 @@ export const orderService = {
     getMyOrders: () => api.get('/orders/my-orders'),
 };
 
-export const sellerService = {
-    requestSeller: (data: any) => api.post('/seller/request', data),
-    getPendingRequests: () => api.get('/seller/admin/pending'),
-    approveRequest: (id: number) => api.post(`/seller/admin/approve/${id}`),
-};
-
-export const paymentService = {
-    createPayment: (paymentRequest: any) => api.post('/payment/create', paymentRequest),
-    manualConfirm: (orderId: string) => api.post('/payment/manual-confirm', { orderId }),
-};
-
 export const adminService = {
     getAllUsers: () => api.get('/auth/admin/users'),
 };

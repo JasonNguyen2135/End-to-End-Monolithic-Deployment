@@ -1,6 +1,5 @@
 package com.example.backend.mapper;
 
-
 import com.example.backend.dto.*;
 import com.example.backend.entity.*;
 import java.util.stream.Collectors;
@@ -18,15 +17,6 @@ public final class OrderMapper {
         dto.setUpdatedAt(o.getUpdatedAt());
         dto.setItems(o.getItems().stream().map(OrderMapper::toItemDto).collect(Collectors.toList()));
         return dto;
-    }
-
-    public static OrderSummaryResponse toSummaryDto(Order o) {
-        OrderSummaryResponse s = new OrderSummaryResponse();
-        s.setId(o.getId());
-        s.setTotalAmount(o.getTotalAmount());
-        s.setStatus(o.getStatus());
-        s.setCreatedAt(o.getCreatedAt());
-        return s;
     }
 
     public static OrderItemResponse toItemDto(OrderItem i) {

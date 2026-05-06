@@ -1,85 +1,76 @@
-# V-Shop: Ecommerce Monolithic Platform
+# ECOMMERCE MONOLITHIC DEPLOYMENT PIPELINE
 
-Một ứng dụng thương mại điện tử hoàn chỉnh (Full-stack) được thiết kế theo kiến trúc Monolithic, tích hợp quy trình DevSecOps hiện đại với chiến lược triển khai Blue-Green Deployment.
-
----
-
-## 🏗 Kiến trúc hệ thống
-
-[Dán ảnh sơ đồ kiến trúc của bạn vào đây]
-
-Hệ thống được thiết kế tối giản nhưng vẫn đảm bảo đầy đủ các thành phần của một ứng dụng thực tế, bao gồm:
-- **Client Tier**: Giao diện React (TypeScript) tương tác với API qua Axios.
-- **Application Tier**: Spring Boot xử lý logic nghiệp vụ, bảo mật với JWT.
-- **Data Tier**: PostgreSQL lưu trữ dữ liệu sản phẩm, người dùng và đơn hàng.
-- **Infrastructure**: Triển khai trên Kubernetes (K8s) thông qua GitOps (ArgoCD).
+He thong thuong mai dien tu Full-stack duoc thiet ke de minh hoa quy trinh trien khai DevSecOps hien dai tren nen tang Kubernetes.
 
 ---
 
-## 🛠 Tech Stack
+## KIEN TRUC HE THONG
 
-### Backend
-- **Core**: Java 21, Spring Boot 4.x
-- **Security**: Spring Security, JWT (Stateless Authentication)
-- **Database**: Spring Data JPA, PostgreSQL
-- **Validator**: Hibernate Validator
+[Chen anh so do kien truc pipeline va ha tang tai day]
 
-### Frontend
-- **Framework**: React 18, TypeScript
-- **Styling**: Vanilla CSS (Custom UI Components)
-- **State Management**: React Context API
-
-### DevOps & Infrastructure
-- **CI/CD**: GitHub Actions
-- **Containerization**: Docker, Docker Compose
-- **Orchestration**: Kubernetes
-- **GitOps**: ArgoCD
-- **Deployment Strategy**: Argo Rollouts (Blue-Green Deployment)
+Du an tap trung vao viec tu dong hoa chu ky song phat trien phan mem, bao gom cac thanh phan:
+- Giao dien nguoi dung: React (TypeScript)
+- Logic nghiep vu: Spring Boot (Java 21)
+- Luu tru du lieu: PostgreSQL
+- Ha tang trien khai: Kubernetes Cluster
 
 ---
 
-## 🚀 Chức năng chính
+## CONG NGHE SU DUNG
 
-- **Quản lý người dùng**: Đăng ký, đăng nhập và phân quyền (User/Admin).
-- **Cửa hàng**: Hiển thị danh sách sản phẩm, chi tiết sản phẩm và danh mục.
-- **Giỏ hàng**: Thêm/sửa/xóa sản phẩm trong giỏ hàng theo từng người dùng.
-- **Đặt hàng**: Quy trình đặt hàng nhanh chóng và lưu vết lịch sử đơn hàng.
-- **Quản trị (Admin)**: Quản lý danh mục và người dùng hệ thống.
+BACKEND
+- Java 21 va Spring Boot 4.x
+- Spring Security voi co che xac thuc JWT
+- Spring Data JPA ket noi PostgreSQL
 
----
+FRONTEND
+- React 18 va TypeScript
+- Axios giao tiep API
 
-## 📦 Hướng dẫn cài đặt nhanh
-
-### Yêu cầu hệ thống
-- Docker & Docker Compose
-- JDK 21 (nếu chạy local không qua Docker)
-- Node.js (nếu chạy local không qua Docker)
-
-### Chạy bằng Docker Compose
-```bash
-# Clone dự án
-git clone https://github.com/davidmoi2135/End-to-End-Monolithic-Deployment.git
-
-# Khởi chạy toàn bộ hệ thống
-docker-compose up --build
-```
-- **Frontend**: http://localhost:3000
-- **Backend**: http://localhost:8081
+DEVOPS VA HA TANG
+- CI/CD Pipeline: GitHub Actions
+- Quan ly container: Docker
+- Dieu phoi container: Kubernetes
+- GitOps: ArgoCD
+- Deployment Strategy: Argo Rollouts (Blue-Green Deployment)
+- Security: Quet lo hong image voi Trivy
 
 ---
 
-## 🔄 Quy trình Triển khai (CI/CD)
+## QUY TRINH TRIEN KHAI (CI/CD)
 
-Dự án áp dụng quy trình tự động hóa hoàn toàn từ khâu kiểm thử đến triển khai:
-1. **Build & Scan**: GitHub Actions tự động build Docker Image và quét lỗ hổng bảo mật bằng Trivy.
-2. **Push Image**: Đẩy Image lên Docker Hub với Tag tương ứng.
-3. **GitOps Trigger**: Pipeline cập nhật Manifest YAML trong repository.
-4. **ArgoCD Sync**: ArgoCD tự động đồng bộ trạng thái mới nhất lên Kubernetes Cluster.
-5. **Blue-Green Rollout**: Sử dụng Argo Rollouts để chuyển đổi phiên bản không gây gián đoạn (Zero Downtime).
+1. CODE INTEGRATION
+- Tu dong kiem tra va build ma nguon khi co thay doi tren nhanh main.
+- Thuc hien quet bao mat ma nguon va Docker image bang Trivy de phat hien lo hong.
+
+2. ARTIFACT MANAGEMENT
+- Dong goi ung dung thanh Docker images.
+- Tu dong gan tag va day (push) image len Docker Hub.
+
+3. GITOPS WORKFLOW
+- Pipeline tu dong cap nhat Manifest YAML (Image Tag) trong repository cau hinh.
+- ArgoCD theo doi repository va tu dong dong bo (sync) trang thai mong muon len Kubernetes cluster.
+
+4. BLUE-GREEN DEPLOYMENT
+- Su dung Argo Rollouts de thuc hien trien khai Blue-Green.
+- Tao moi truong Preview de kiem tra phien ban moi truoc khi chuyen traffic.
+- Chuyen doi traffic giua Active Service va Preview Service de dam bao Zero Downtime va co kha nang Rollback tuc thi.
 
 ---
 
-## 📞 Liên hệ
-- **Tác giả**: [Tên của bạn]
-- **Email**: [Email của bạn]
-- **LinkedIn**: [Link LinkedIn của bạn]
+## HUONG DAN CAI DAT LOCAL
+
+YEU CAU
+- Docker
+- Docker Compose
+
+KHOI CHAY HE THONG
+1. Clone repository:
+   git clone https://github.com/davidmoi2135/End-to-End-Monolithic-Deployment.git
+
+2. Khoi chay bang Docker Compose:
+   docker-compose up --build
+
+3. Truy cap ung dung:
+   - Frontend: http://localhost:3000
+   - Backend API: http://localhost:8081

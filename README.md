@@ -1,4 +1,4 @@
-# ECOMMERCE MONOLITHIC DEPLOYMENT PIPELINE
+<img width="986" height="515" alt="image" src="https://github.com/user-attachments/assets/585a2b35-37bd-4dfd-aec1-ea366c16ad94" /># ECOMMERCE MONOLITHIC DEPLOYMENT PIPELINE
 
 Hệ thống thương mại điện tử Full-stack được thiết kế để minh họa quy trình triển khai DevSecOps hiện đại trên nền tảng Kubernetes.
 
@@ -6,7 +6,7 @@ Hệ thống thương mại điện tử Full-stack được thiết kế để 
 
 ## KIẾN TRÚC HỆ THỐNG
 
-[Chèn ảnh sơ đồ kiến trúc pipeline và hạ tầng tại đây]
+<img width="986" height="515" alt="image" src="https://github.com/user-attachments/assets/a31533b5-7967-4097-a18b-12daecded966" />
 
 Dự án tập trung vào việc tự động hóa chu kỳ sống phát triển phần mềm, bao gồm các thành phần:
 - Giao diện người dùng: React (TypeScript)

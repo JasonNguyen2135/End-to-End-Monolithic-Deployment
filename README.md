@@ -28,16 +28,57 @@ FRONTEND
 - Axios giao tiếp API
 
 DEVOPS VÀ HẠ TẦNG
+- Infrastructure as Code: Terraform
+- Configuration Management: Ansible (Kubespray)
 - CI/CD Pipeline: GitHub Actions
 - Quản lý container: Docker
-- Điều phối container: Kubernetes
-- GitOps: ArgoCD
-- Deployment Strategy: Argo Rollouts (Blue-Green Deployment)
+- Điều phối container: Kubernetes Cluster (tự vận hành)
+- GitOps: ArgoCD và Argo Rollouts
+- Monitoring: Prometheus và Grafana
 - Security: Quét lỗ hổng image với Trivy
 
 ---
 
-## QUY TRÌNH TRIỂN KHAI (CI/CD)
+## HƯỚNG DẪN TRIỂN KHAI HẠ TẦNG
+
+1. KHỞI TẠO TÀI NGUYÊN (TERRAFORM)
+- Di chuyển vào thư mục terraform: `cd terraform`
+- Khởi tạo và thực thi:
+  ```bash
+  terraform init
+  terraform apply -auto-approve
+  ```
+- Kết quả: Terraform sẽ tạo các EC2 Instances trên AWS và tự động tạo file inventory tại `inventory/mycluster/hosts.yaml`.
+
+2. CÀI ĐẶT CỤM KUBERNETES (KUBESPRAY)
+- Đảm bảo đã cài đặt Ansible và clone Kubespray.
+- Chạy playbook để cài đặt cụm:
+  ```bash
+  ansible-playbook -i inventory/mycluster/hosts.yaml --become --become-user=root cluster.yml
+  ```
+
+3. CÀI ĐẶT ARGOCD
+- Tạo namespace và cài đặt:
+  ```bash
+  kubectl create namespace argocd
+  kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+  ```
+- Truy cập Dashboard:
+  ```bash
+  kubectl patch svc argocd-server -n argocd -p '{"spec": {"type": "NodePort"}}'
+  ```
+
+4. CÀI ĐẶT MONITORING (PROMETHEUS & GRAFANA)
+- Sử dụng Helm để cài đặt Kube-Prometheus-Stack:
+  ```bash
+  helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+  helm repo update
+  helm install monitoring prometheus-community/kube-prometheus-stack --namespace monitoring --create-namespace
+  ```
+
+---
+
+## QUY TRÌNH CI/CD
 
 1. CODE INTEGRATION
 - Tự động kiểm tra và build mã nguồn khi có thay đổi trên nhánh main.
@@ -53,18 +94,12 @@ DEVOPS VÀ HẠ TẦNG
 
 4. BLUE-GREEN DEPLOYMENT
 - Sử dụng Argo Rollouts để thực hiện triển khai Blue-Green.
-- Tạo môi trường Preview để kiểm tra phiên bản mới trước khi chuyển traffic.
 - Chuyển đổi traffic giữa Active Service và Preview Service để đảm bảo Zero Downtime và có khả năng Rollback tức thì.
 
 ---
 
-## HƯỚNG DẪN CÀI ĐẶT LOCAL
+## HƯỚNG DẪN CHẠY LOCAL (THỬ NGHIỆM)
 
-YÊU CẦU
-- Docker
-- Docker Compose
-
-KHỞI CHẠY HỆ THỐNG
 1. Clone repository:
    git clone https://github.com/davidmoi2135/End-to-End-Monolithic-Deployment.git
 

@@ -19,17 +19,35 @@ spec:
           ports:
             - containerPort: 8080
           env:
-            # ✅ FIX DỨT ĐIỂM: Truyền thẳng URL đầy đủ, không ghép biến trong code
             - name: SPRING_DATASOURCE_URL
               value: "jdbc:postgresql://postgres:5432/E_Commerence_DB"
             - name: SPRING_DATASOURCE_USERNAME
-              value: "postgres"
+              valueFrom:
+                secretKeyRef:
+                  name: ecommerce-secrets
+                  key: postgres-user
             - name: SPRING_DATASOURCE_PASSWORD
-              value: "postgres"
+              valueFrom:
+                secretKeyRef:
+                  name: ecommerce-secrets
+                  key: postgres-password
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: ecommerce-secrets
+                  key: jwt-secret
+            - name: ADMIN_EMAIL
+              valueFrom:
+                secretKeyRef:
+                  name: ecommerce-secrets
+                  key: admin-email
+            - name: ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: ecommerce-secrets
+                  key: admin-password
             - name: ALLOWED_ORIGINS
               value: "http://localhost:3000,http://localhost:30080,http://vshop.local"
-            - name: JWT_SECRET
-              value: "VDB6clpTMU1YMDFPTTBaUFVVUkpSVUZVUWtkVFJWSlVWRUZVUlZKVVZFMA=="
   strategy:
     blueGreen: 
       activeService: ecommerce-backend-active

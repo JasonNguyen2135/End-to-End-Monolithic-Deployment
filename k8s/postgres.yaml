@@ -28,10 +28,19 @@ spec:
           image: postgres:15
           env:
             - name: POSTGRES_DB
-              value: E_Commerence_DB
+              valueFrom:
+                secretKeyRef:
+                  name: ecommerce-secrets
+                  key: postgres-db
             - name: POSTGRES_USER
-              value: postgres
+              valueFrom:
+                secretKeyRef:
+                  name: ecommerce-secrets
+                  key: postgres-user
             - name: POSTGRES_PASSWORD
-              value: postgres
+              valueFrom:
+                secretKeyRef:
+                  name: ecommerce-secrets
+                  key: postgres-password
           ports:
             - containerPort: 5432

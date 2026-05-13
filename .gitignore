@@ -29,6 +29,7 @@ yarn-error.log*
 # Environment
 .env
 .env.local
+k8s/secrets.yaml
 
 # Logs
 logs/

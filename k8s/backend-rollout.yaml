@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: ecommerce-backend
-          image: phanphan1504/ecommerce-backend:latest
+          image: phanphan1504/ecommerce-backend:85158cb85db212be9e47b3d56070b3f0386fcae5
           ports:
             - containerPort: 8080
           env:
